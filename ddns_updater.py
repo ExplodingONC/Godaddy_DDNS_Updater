@@ -12,6 +12,7 @@ from logger import DDNS_logger
 from configs import api_domain
 
 
+# config if you use proxy service
 USE_PROXY = True
 
 def set_proxy(proxy: str = "socks5://localhost:10808"):
@@ -72,6 +73,7 @@ class DDNSUpdater:
                                     type=self.record_type,
                                     domain=self.domain,
                                     data=data)
+        self.fetch_dns_record()
 
     def update_dns_record(self):
         if not self.record or not self.force_fetch_counter:

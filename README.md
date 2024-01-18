@@ -45,7 +45,9 @@ If you intend to run it as a systemd service, you might need to use `sudo pip in
 
     Porxy service:
     ```
+    USE_PROXY = True or False  # if you need proxy
     def set_proxy(proxy: str = "socks5://your.proxy:serice"):
+        ...
     ```
 
     Hostname list:
