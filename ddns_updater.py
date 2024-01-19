@@ -66,7 +66,7 @@ class DDNSUpdater:
         return ipv4_addr, ipv6_addr
 
     @staticmethod
-    def get_router_ip() -> tuple[ipaddress.IPv4Address, ipaddress.IPv6Address]:
+    def get_router_ip() -> tuple[ipaddress.IPv4Address, ipaddress.IPv4Address]:
         # For Asus routers with SSH enabled
         wan_ip = real_ip = "0.0.0.0"
         try:
