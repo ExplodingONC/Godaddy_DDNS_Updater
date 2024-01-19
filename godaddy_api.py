@@ -25,14 +25,22 @@ class GodaddyApi:
                                 headers=self.headers)
         try:
             if response.status_code == 200:
-                response_json = response.json()[0]
+                if len(response.json()) > 0:
+                    response_json = response.json()[0]
+                else:
+                    response_json = {"message": "Record not found."}
                 DDNS_logger.info(response_json)
                 return response_json
             else:
-                DDNS_logger.warning(response.json())
+                DDNS_logger.warning(f"Failed to fetch {type} record for {name}:\n"
+                                    f"Status Code: {response.status_code}\n"
+                                    f"Json Content: {response.json()}")
                 return {}
-        except:
-            DDNS_logger.warning(response.json())
+        except Exception as e:
+            DDNS_logger.warning(f"Failed to fetch {type} record for {name}:\n"
+                                f"Status Code: {response.status_code}\n"
+                                f"Json Content: {response.json()}\n"
+                                f"Exception: {e}")
             return {}
 
     def set_record(self, name: str, type: RECORD_TYPE,
@@ -45,6 +53,21 @@ class GodaddyApi:
                                 json=payload)
         try:
             if response.status_code == 200:
+                return True
+            else:
+                DDNS_logger.warning(response.json())
+                return False
+        except:
+            DDNS_logger.warning(response.json())
+            return False
+        
+    def delete_record(self, name: str, type: RECORD_TYPE,
+                      domain: str = DOMAIN) -> bool:
+        uri = f"https://api.godaddy.com/v1/domains/{domain}/records/{type}/{name}"
+        response = requests.delete(url=uri,
+                                   headers=self.headers)
+        try:
+            if response.status_code == 204:
                 return True
             else:
                 DDNS_logger.warning(response.json())
