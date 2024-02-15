@@ -120,7 +120,7 @@ class DDNSUpdater:
             if self.record_type == "A":
                 if str(current_ipv4) != self.record.get("data"):
                     DDNS_logger.warning(f"DDNS update for IPv4 is needed...")
-                    self.push_dns_record(data=str(current_real_ipv4))
+                    self.push_dns_record(data=str(current_ipv4))
                 else:
                     DDNS_logger.info(f"DDNS for IPv4 is up to date...")
             if self.record_type == "AAAA" and not current_ipv6.is_private:
@@ -154,19 +154,27 @@ class DDNSUpdater:
 
 
 def main():
+    # count fails
+    fail_count: int = 0
     # do DDNS monitoring and updates
     try:
         if USE_PROXY:
             set_proxy()
         home_updater_4 = DDNSUpdater(name="home-server", type="A", router=True)
-        home_updater_4.fetch_dns_record()
         home_updater_6 = DDNSUpdater(name="home-server", type="AAAA", router=False)
-        home_updater_6.fetch_dns_record()
         while True:
-            home_updater_4.update_dns_record()
-            home_updater_6.update_dns_record()
-            time_sleep = random.randint(30, 60)
-            time.sleep(time_sleep)
+            try:
+                home_updater_4.update_dns_record()
+                home_updater_6.update_dns_record()
+                time_sleep = random.randint(30, 60)
+                time.sleep(time_sleep)
+            except Exception as e:
+                fail_count += 1
+                DDNS_logger.warning(f"DDNS update attempt # {fail_count} failed: {e}")
+                if fail_count >= 20:
+                    raise RuntimeError from e
+            else:
+                fail_count = 0
     except:
         DDNS_logger.error(f"\n\n{traceback.format_exc()}")
     finally:
