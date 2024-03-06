@@ -166,12 +166,12 @@ def main():
             try:
                 home_updater_4.update_dns_record()
                 home_updater_6.update_dns_record()
-                time_sleep = random.randint(30, 60)
+                time_sleep = random.randint(30, 60) + fail_count
                 time.sleep(time_sleep)
             except Exception as e:
                 fail_count += 1
                 DDNS_logger.warning(f"DDNS update attempt # {fail_count} failed: {e}")
-                if fail_count >= 20:
+                if fail_count >= 100:
                     raise RuntimeError from e
             else:
                 fail_count = 0

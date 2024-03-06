@@ -11,6 +11,8 @@ RECORD_TYPE = Literal["A", "AAAA", "CNAME", "MX", "NS", "SOA", "SRV", "TXT"]
 
 class GodaddyApi:
 
+    timeout: float = 30
+
     key: str = api_key
     secret: str = api_secret
     headers: dict = {"Accept": "application/json",
@@ -22,7 +24,8 @@ class GodaddyApi:
                    domain: str = DOMAIN) -> dict:
         uri = f"https://api.godaddy.com/v1/domains/{domain}/records/{type}/{name}"
         response = requests.get(url=uri,
-                                headers=self.headers)
+                                headers=self.headers,
+                                timeout=self.timeout)
         try:
             if response.status_code == 200:
                 if len(response.json()) > 0:
@@ -50,7 +53,8 @@ class GodaddyApi:
         payload = [{"data": data, "ttl": ttl}]
         response = requests.put(url=uri,
                                 headers=self.headers,
-                                json=payload)
+                                json=payload,
+                                timeout=self.timeout)
         try:
             if response.status_code == 200:
                 return True
@@ -65,7 +69,8 @@ class GodaddyApi:
                       domain: str = DOMAIN) -> bool:
         uri = f"https://api.godaddy.com/v1/domains/{domain}/records/{type}/{name}"
         response = requests.delete(url=uri,
-                                   headers=self.headers)
+                                   headers=self.headers,
+                                   timeout=self.timeout)
         try:
             if response.status_code == 204:
                 return True
