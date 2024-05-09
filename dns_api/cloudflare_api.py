@@ -77,7 +77,7 @@ class CloudflareDNSApi(AbstractDNSApi):
                    f"dns_records")
             payload = {"name": record.name, "type": record.type,
                        "content": record.value, "ttl": record.ttl,
-                       "proxied": True}
+                       "proxied": False}
             response = requests.post(url=uri,
                                      headers=self.headers,
                                      json=payload,
