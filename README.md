@@ -1,18 +1,22 @@
-# DDNS Updater for Godaddy DNS
+# DDNS Updater for Cloudflare / Godaddy DNS
 
-Monitors local IP address changes (both IPv4 and IPV6), and updates them to https://api.godaddy.com.
+Monitors local IP address changes (both IPv4 and IPV6), and updates them to Cloudflare (recommended) / Godaddy (if you are rich enough to use their paid API).
+
+I don't like it when Godaddy just starts charging money for their basic API service with absolutely no pre-warning. So I don't recommend it to anyone. 😠
+
+The whole structure is re-written to support both Cloudflare and Godaddy DNS, and improve (hopefully) the config process at the same time.
 
 Written for **Debian / Ubuntu** systems.  
 Some tinkering is likely needed for this to work on other Linux distributions.
 
 ## Usage
 
-1. Register your domain and API keys at https://godaddy.com (refer to Godaddy site for details).
+1. Register your domain and API keys or tokens at Cloudflare / Godaddy (refer to their sites for details).
 
 2. Clone this repository to local.
 
 3. Install requirements according to `requirements.txt`.  
-If you intend to run it as a systemd service, you might need to use `sudo pip install ...`.
+If you intend to run it as a systemd service, you might need to use `sudo pip install ...`, or dig around with your specific python environment setup.
 
     1. You might need to install `python3-dev` and  `libsystemd-dev` with the following command, for `cysystemd` to work.
         
@@ -31,30 +35,11 @@ If you intend to run it as a systemd service, you might need to use `sudo pip in
         # DDNS_logger.addHandler(journal_handler)
         ```
 
-4. Create a file named `configs.py` under the root directory of this repository, with contents below.  
+4. Modify file `configs sample.py` under the root directory, and `router_cfg sample.py` under `local_utils` of this repository. Instructions are included in the files.
 
-    **Never share it with other people!** Or you might lost your domain forever!
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**Never share them with other people!** Or you might get hacked / lose your domain forever!
 
-    ```
-    api_key = "your_api_key"
-    api_secret = "your_api_secret"
-    api_domain = "your.domain"
-    ```
-
-5. Edit other parameters as you need, i.e.,
-
-    Porxy service:
-    ```
-    USE_PROXY = True or False  # if you need proxy
-    def set_proxy(proxy: str = "socks5://your.proxy:serice"):
-        ...
-    ```
-
-    Hostname list:
-    ```
-    www_updater = DDNSUpdater(name="your-hostname", type="CNAME")
-    home_updater = DDNSUpdater(name="your-other-hostname", type="AAAA")
-    ```
+5. You can goofing / digging around to change other things, like if you do not use an Asus router and want to implement something else, or remove this function which gets IP info from the router.
 
 6. Run `ddns_updater.py` to test it out.
 
@@ -64,7 +49,7 @@ If you intend to run it as a systemd service, you might need to use `sudo pip in
 
     1. Create a file named `/etc/systemd/system/ddns-updater.service`
 
-    2. Edit the file as below, with your own username:
+    2. Edit the file as below, with your own username and path:
         ```
         [Unit]
         Description=DDNS updater for Godaddy DNS
@@ -78,7 +63,7 @@ If you intend to run it as a systemd service, you might need to use `sudo pip in
         Restart=on-failure
         RestartSec=5
         User=<your user name>
-        ExecStart=/bin/python3 /home/explodingonc/services/ddns_updater/ddns_updater.py
+        ExecStart=/bin/python3 /home/<user>/services/ddns_updater/ddns_updater.py
 
         [Install]
         WantedBy=multi-user.target

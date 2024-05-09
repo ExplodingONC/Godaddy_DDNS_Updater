@@ -1,31 +1,32 @@
 import sys
 import logging
 import pathlib
-from logging import handlers
+from logging import Logger, handlers
 from systemd import journal
 
 
-# log file path
-log_file = pathlib.Path(__file__).absolute().parent.joinpath("logs").joinpath("ddns_updater.log")
+class TaskLogger(logging.Logger):
 
-# set formatter
-formatter = logging.Formatter('%(asctime)s | %(name)s - %(levelname)s | %(message)s')
+    def __new__(cls, name: str, level: int | str = logging.INFO) -> Logger:
+        new_logger = logging.getLogger(name=name)
+        new_logger.setLevel(level=level)
 
-# create logger
-DDNS_logger = logging.getLogger('ddns_updater')
+        # log file path
+        log_file = pathlib.Path(__file__).absolute().parent.joinpath("logs").joinpath(name + ".log")
+        # set formatter
+        formatter = logging.Formatter('%(asctime)s | %(name)s - %(levelname)s | %(message)s')
 
-# add handlers
-journal_handler = journal.JournalHandler()
-journal_handler.setFormatter(formatter)
-DDNS_logger.addHandler(journal_handler)
-stdout_handler = logging.StreamHandler(sys.stdout)
-stdout_handler.setFormatter(formatter)
-DDNS_logger.addHandler(stdout_handler)
-file_handler = handlers.TimedRotatingFileHandler(
-    filename=log_file, backupCount=20,
-    when="midnight", interval=1)
-file_handler.setFormatter(formatter)
-DDNS_logger.addHandler(file_handler)
+        # add handlers
+        journal_handler = journal.JournalHandler()
+        journal_handler.setFormatter(formatter)
+        new_logger.addHandler(journal_handler)
+        stdout_handler = logging.StreamHandler(sys.stdout)
+        stdout_handler.setFormatter(formatter)
+        new_logger.addHandler(stdout_handler)
+        file_handler = handlers.TimedRotatingFileHandler(
+            filename=log_file, backupCount=20,
+            when="midnight", interval=1)
+        file_handler.setFormatter(formatter)
+        new_logger.addHandler(file_handler)
 
-# set logging level
-DDNS_logger.setLevel(logging.INFO)
+        return new_logger
